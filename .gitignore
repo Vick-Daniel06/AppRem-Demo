@@ -121,3 +121,8 @@ app.*.symbols
 #IntelliJ/Android Studio
 .idea/
 *.iml
+
+#Other config
+apprem_v1/.metadata
+apprem_v1/ios/Flutter/
+apprem_v1/macos/Flutter/
