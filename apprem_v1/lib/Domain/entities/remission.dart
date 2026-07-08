@@ -3,7 +3,7 @@ import 'package:apprem_v1/Domain/entities/detail_line.dart';
 class Remission {
   final String id;
   final String folio;
-  final DateTime fechaCracion;
+  final DateTime fechaCreacion;
   final String nombreVendedor;
   final String nombreCliente;
   final String firmaPath;
@@ -15,7 +15,7 @@ class Remission {
   const Remission({
     required this.id,
     required this.folio,
-    required this.fechaCracion,
+    required this.fechaCreacion,
     required this.nombreVendedor,
     required this.nombreCliente,
     required this.detailLines,
@@ -27,7 +27,7 @@ class Remission {
   Remission copyWith({
     String? id,
     String? folio,
-    DateTime? fechaCracion,
+    DateTime? fechaCreacion,
     String? nombreVendedor,
     String? nombreCliente,
     String? firmaPath,
@@ -36,7 +36,7 @@ class Remission {
   }){
     return Remission(id: id?? this.id,
      folio: folio?? this.folio,
-      fechaCracion: fechaCracion?? this.fechaCracion,
+      fechaCreacion: fechaCreacion?? this.fechaCreacion,
        nombreVendedor: nombreVendedor?? this.nombreVendedor,
         nombreCliente: nombreCliente?? this.nombreCliente,
           detailLines: detailLines?? this.detailLines,
