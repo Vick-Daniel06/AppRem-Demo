@@ -10,4 +10,6 @@ abstract class RemissionRepository {
 /// Consulta la base de datos para calcular el consecutivo del folio (MAX(folio) + 1).
   Future<String>obtenerSiguienteFolio();
 
+  Future<Remission?> obtenerRemisionById(String id);
+
 }
