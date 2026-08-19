@@ -126,3 +126,6 @@ app.*.symbols
 apprem_v1/.metadata
 apprem_v1/ios/Flutter/
 apprem_v1/macos/Flutter/
+
+#Dart DevTool settings
+devtools_options.yaml
