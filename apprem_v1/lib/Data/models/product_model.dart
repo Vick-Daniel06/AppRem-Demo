@@ -1,4 +1,5 @@
 import 'package:apprem_v1/Domain/entities/product.dart';
+import 'package:apprem_v1/Data/database/app_database.dart' as db;
 
 class ProductModel extends Product{
 
@@ -8,24 +9,24 @@ const ProductModel({
   required super.pesoKg,
   required super.precioSugerido,
 });
-/// MAPPER: Convierte un mapa crudo de SQLite (llave-valor) a un Modelo de Dart.
+/// MAPPER:
 /// util para leer datos de tablas
-factory ProductModel.fromSqlite(Map<String, dynamic> json){
-  return ProductModel(id: json['id'] as String,
-   nombre: json['nombre'] as String,
-    pesoKg: (json['peso_kg'] as num).toDouble(),
-     precioSugerido:(json['precio_sugerido'] as num).toDouble() 
-     );
+factory ProductModel.fromDrift(db.Product product){
+  return ProductModel(
+    id: product.id, 
+    nombre: product.nombre, 
+    pesoKg: product.pesoKg, 
+    precioSugerido: product.precioSugerido
+    );
 }
-/// MAPPER: Convierte este Modelo a un formato que SQLite entiende para poder guardarlo.
-Map<String, dynamic> toSqlite(){
-  return{
-    'id': id,
-    'nombre': nombre,
-    'peso_kg': pesoKg,
-    'precio_sugerido': precioSugerido,
-  };
+db.ProductsCompanion toCompanion(){
+  return db.ProductsCompanion.insert(id: id,
+   nombre: nombre, 
+   pesoKg: pesoKg, 
+   precioSugerido: precioSugerido
+   );
 }
+
 /// MAPPER: Convierte una Entidad pura de Dominio a este Modelo de Datos.
   /// Útil cuando el repositorio recibe un Product del Dominio y necesita guardarlo.
 factory ProductModel.fromEntity(Product entity){
