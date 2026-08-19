@@ -27,31 +27,14 @@ class RemissionRepositoryImpl implements RemissionRepository {
 
   @override
   Future<void> crearRemision(Remission remission) async{
-    //Convierte la lista de entidades del dominio a una lista de Modelos las Lineas
-    final linesModel = remission.detailLines.map((line){
-      return DetailLineModel(
-        id: line.id,
-        remisionId: line.remisionId,
-        prodctoId: line.prodctoId,
-        nombreProducto: line.nombreProducto,
-        cantidad: line.cantidad,
-        precioSugeridoOriginal: line.precioSugeridoOriginal,
-        precioUnitarioEnEseMomento: line.precioUnitarioEnEseMomento,
-      );
-    }).toList();
-//Se crea el modelo completo con su lista de lineas ya traducida
-  final remissionModel = RemissionModel(
-      id: remission.id,
-      folio: remission.folio,
-      fechaCreacion: remission.fechaCreacion,
-      nombreVendedor: remission.nombreVendedor,
-      nombreCliente: remission.nombreCliente,
-      firmaPath: remission.firmaPath,
-      fotoEvidenciaPath: remission.fotoEvidenciaPath,
-      detailLines: linesModel,
-  );
+    final remissionModel = RemissionModel.fromEntity(remission);
   //El modelo completo es el que se le manda al DataSource
   await _localDataSource.guardarRemision(remissionModel);
+  }
+  @override
+  Future<Remission?> obtenerRemisionById(String id) async{
+    final model = await _localDataSource.getRemissionById(id);
+    return model;
   }
 
 }

@@ -1,5 +1,5 @@
-import 'package:apprem_v1/data/datasources/product_local_data_source.dart';
-import 'package:apprem_v1/data/models/product_model.dart';
+import 'package:apprem_v1/Data/datasources/product_local_data_source.dart';
+import 'package:apprem_v1/Data/models/product_model.dart';
 import 'package:apprem_v1/Domain/respositories_interfaces/product_repository.dart';
 import 'package:apprem_v1/Domain/entities/product.dart';
 
