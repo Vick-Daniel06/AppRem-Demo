@@ -1,3 +1,20 @@
+import 'package:apprem_v1/Data/services/camera_service_impl.dart';
+import 'package:apprem_v1/Data/services/pdf_service_impl.dart';
+import 'package:apprem_v1/Data/services/signature_service_impl.dart';
+import 'package:apprem_v1/Domain/services_interfaces/camera_services.dart';
+import 'package:apprem_v1/Domain/services_interfaces/pdf_services.dart';
+import 'package:apprem_v1/Domain/services_interfaces/signature_services.dart';
+import 'package:apprem_v1/Domain/usecases/remission/create_remission_use_case.dart';
+import 'package:apprem_v1/Domain/usecases/remission/generate_pdf_and_share_use_case.dart';
+import 'package:apprem_v1/Domain/usecases/remission/get_folio_use_case.dart';
+import 'package:apprem_v1/Domain/usecases/remission/get_historial_remission_use_case.dart';
+import 'package:apprem_v1/Domain/usecases/remission/get_remission_by_id_use_case.dart';
+import 'package:apprem_v1/Presentation/blocs/clients/client_bloc.dart';
+import 'package:apprem_v1/Presentation/blocs/deviceAction/device_action_bloc.dart';
+import 'package:apprem_v1/Presentation/blocs/historial/historial_bloc.dart';
+import 'package:apprem_v1/Presentation/blocs/pdfGenerate/pdf_bloc.dart';
+import 'package:apprem_v1/Presentation/blocs/products/product_bloc.dart';
+import 'package:apprem_v1/Presentation/blocs/remissionForm/remForm_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:apprem_v1/Data/database/app_database.dart';
 
@@ -11,7 +28,7 @@ import 'package:apprem_v1/Domain/usecases/product/save_product_use_case.dart';
 import 'package:apprem_v1/Domain/usecases/product/get_products_use_case.dart';
 
 import 'package:apprem_v1/Data/datasources/client_local_data_source.dart';
-import 'package:apprem_v1/data/datasources/product_local_data_source.dart'; ///encuentra el archivo en data y no en Data como debe de ser
+import 'package:apprem_v1/Data/datasources/product_local_data_source.dart'; ///encuentra el archivo en data y no en Data como debe de ser
 import 'package:apprem_v1/Data/datasources/remission_local_data_source.dart';
 
 import 'Domain/respositories_interfaces/client_repository.dart';
@@ -55,7 +72,56 @@ Future<void> init() async{
   sl.registerLazySingleton(()=> SaveClientUseCase(sl<ClientRepository>()));
   sl.registerLazySingleton(()=> UpdateClientUseCase(sl<ClientRepository>()));
   sl.registerLazySingleton(()=> DeleteClientUseCase(sl<ClientRepository>()));
+
+  sl.registerLazySingleton(()=> CreateRemissionUseCase(sl<RemissionRepository>()));
+  sl.registerLazySingleton(()=> GetFolioUseCase(sl<RemissionRepository>()));
+  sl.registerLazySingleton(()=> GetHistorialRemissionUseCase(sl<RemissionRepository>()));
+  sl.registerLazySingleton(()=> GeneratePdfAndShareUseCase(sl<PdfServices>()));
+  sl.registerLazySingleton(()=> GetRemissionByIdUseCase(sl<RemissionRepository>()));
   
+  
+  //External services
+  // Registra el contrato de la cámara apuntando a su implementación nativa
+  sl.registerLazySingleton<CameraServices>(() => CameraServiceImpl());
+  sl.registerLazySingleton<SignatureService>(()=> SignatureServiceImpl());
+  sl.registerLazySingleton<PdfServices>(()=> PdfServiceImpl());
+
+  //BLOCS
+  //registerFactory por que el BlLoC se debe cerrar y volver a crear opara evitar fugas de memoria
+  sl.registerFactory(
+    () => HistorialBloc(getHistorialRemissionUseCase: sl<GetHistorialRemissionUseCase>()),
+  );
+  sl.registerFactory(
+    ()=> RemformBloc(
+      getClient: sl<GetClientsUseCase>(),
+      getProduct: sl<GetProductsUseCase>(),
+      getFolio: sl<GetFolioUseCase>(),
+      createRem: sl<CreateRemissionUseCase>(),
+    ),
+  );
+  sl.registerFactory(
+    () => DeviceActionBloc(cameraServices: sl<CameraServices>(), signatureService: sl<SignatureService>())
+  );
+  sl.registerFactory(
+  ()=> PdfBloc(generatePdfAndShareUseCase: sl<GeneratePdfAndShareUseCase>(), getRemissionByIdUseCase: sl<GetRemissionByIdUseCase>())
+  );
+  sl.registerFactory(
+    ()=> ProductBloc(
+      getProductsUseCase: sl<GetProductsUseCase>(),
+      saveProductUseCase: sl<SaveProductUseCase>(),
+      updateProductUseCase: sl<UpdateProductUseCase>(),
+      deleteProductUseCase: sl<DeleteProductUseCase>(),
+    )
+  );
+  sl.registerFactory(
+    ()=> ClientBloc(
+      deleteClientUseCase: sl<DeleteClientUseCase>(), 
+      getClientsUseCase: sl<GetClientsUseCase>(), 
+      saveClientUseCase: sl<SaveClientUseCase>(), 
+      updateClientUseCase: sl<UpdateClientUseCase>(),
+      )
+  );
+
 }
 
 
