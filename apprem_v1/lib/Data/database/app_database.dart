@@ -1,8 +1,6 @@
+
 import 'package:drift/drift.dart';
-import 'dart:io';
-import 'package:drift/native.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
+import 'package:drift_flutter/drift_flutter.dart';
 
 part 'app_database.g.dart';
 
@@ -60,15 +58,56 @@ class AppDatabase extends _$AppDatabase {
 // El control de versiones
   @override
   int get schemaVersion => 1;
+  @override
+  MigrationStrategy get migration {
+    return MigrationStrategy(
+      onCreate: (Migrator m) async {
+        // 1. Primero creamos físicamente todas las tablas en SQLite
+        await m.createAll();
+
+        // 2. Insertamos Clientes semilla (usando los Companions que genera Drift)
+        // Nota: Si tus tablas se llaman "Products" o "Clients", Drift genera "ProductsCompanion"
+        await into(clients).insert(ClientsCompanion.insert(
+          id: 'client-uuid-1',
+          nombre: 'Distribuidora Martínez',
+          ubicacionCliente: 'Av. Constitución #450, Centro',
+        ));
+
+        await into(clients).insert(ClientsCompanion.insert(
+          id: 'client-uuid-2',
+          nombre: 'Abarrotes San Juan',
+          ubicacionCliente: 'Calle Tercera #12, Industrial',
+        ));
+
+        // 3. Insertamos Productos semilla con precios base
+        await into(products).insert(ProductsCompanion.insert(
+          id: 'prod-uuid-1',
+          nombre: 'Caja de Tomate Rojo',
+          pesoKg: 25.0,
+          precioSugerido: 350.0,
+        ));
+
+        await into(products).insert(ProductsCompanion.insert(
+          id: 'prod-uuid-2',
+          nombre: 'Saco de Papa Blanca',
+          pesoKg: 50.0,
+          precioSugerido: 600.0,
+        ));
+
+        await into(products).insert(ProductsCompanion.insert(
+          id: 'prod-uuid-3',
+          nombre: 'Arpilla de Cebolla',
+          pesoKg: 30.0,
+          precioSugerido: 420.0,
+        ));
+      },
+    );
+  }
 }
+
 /// Función interna para abrir la conexión al archivo físico .sqlite en el dispositivo
-LazyDatabase _openConnection(){
-  return LazyDatabase(() async{
-    final dbFolder = await getApplicationDocumentsDirectory();
-
-    final file = File(p.join(dbFolder.path, 'apprem.sqlite'));
-
-    return NativeDatabase.createInBackground(file);
-  });
+QueryExecutor _openConnection(){
+  return driftDatabase(name: 'apprem');
+  
 }
 
