@@ -5,5 +5,5 @@ abstract class SignatureService {
   /// como un archivo de imagen (.png) en el almacenamiento seguro de la app.
   /// 
   /// Retorna un [String] con la ruta local del archivo de la firma generado.
-  Future<String> guardarFirmaDigital(Uint8List bytesFirma);
+  Future<String?> guardarFirmaDigital(Uint8List bytesFirma);
 }
