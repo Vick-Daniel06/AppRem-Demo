@@ -1,5 +1,7 @@
+
 import 'package:flutter/material.dart';
 import 'injection_container.dart' as di;
+import 'package:apprem_v1/Presentation/routers/app_router.dart';
 
 void main() async {
   // Asegura que los bindings nativos de Flutter estén listos antes de inicializar dependencias
@@ -15,15 +17,15 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-   return MaterialApp(
+   return MaterialApp.router(
       title: 'AppRem Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const Scaffold(
-        body: Center(child: Text('¡Motor de dependencias e infraestructura LISTO!')),
-      ),
-    );
+        routerConfig: AppRouter.router, //go_router
+      );
+   
   }
 }
