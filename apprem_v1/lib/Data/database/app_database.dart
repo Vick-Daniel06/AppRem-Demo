@@ -34,6 +34,11 @@ class Remissions extends Table{
 
   @override
   Set<Column> get primaryKey => {id};
+// ÍNDICE PARA OPTIMIZAR LA PAGINACIÓN Y EL ORDEN POR FECHA
+  @override
+  List<Index> get indexes => [
+    Index('remissions_fecha_idx', 'fecha_creacion'),
+  ];
 }
 //Tabal Details Lines(los reglones de la remision)
 class DetailLines extends Table{
