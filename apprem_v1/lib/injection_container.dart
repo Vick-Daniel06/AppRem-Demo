@@ -18,14 +18,9 @@ import 'package:apprem_v1/Presentation/blocs/remissionForm/remForm_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:apprem_v1/Data/database/app_database.dart';
 
-import 'package:apprem_v1/Domain/usecases/client/delete_client_use_case.dart';
-import 'package:apprem_v1/Domain/usecases/client/get_clients_use_case.dart';
 import 'package:apprem_v1/Domain/usecases/client/save_client_use_case.dart';
-import 'package:apprem_v1/Domain/usecases/client/update_client_use_case.dart';
-import 'package:apprem_v1/Domain/usecases/product/update_product_use_case.dart';
 import 'package:apprem_v1/Domain/usecases/product/delete_product_use_case.dart';
 import 'package:apprem_v1/Domain/usecases/product/save_product_use_case.dart';
-import 'package:apprem_v1/Domain/usecases/product/get_products_use_case.dart';
 
 import 'package:apprem_v1/Data/datasources/client_local_data_source.dart';
 import 'package:apprem_v1/Data/datasources/product_local_data_source.dart'; ///encuentra el archivo en data y no en Data como debe de ser
@@ -63,15 +58,10 @@ Future<void> init() async{
     ()=> RemissionRepositoryImpl(sl<RemissionLocalDataSource>()),
   );
   //USE CASEs
-  sl.registerLazySingleton(()=> GetProductsUseCase(sl<ProductRepository>()));
   sl.registerLazySingleton(()=> SaveProductUseCase(sl<ProductRepository>()));
-  sl.registerLazySingleton(()=> UpdateProductUseCase(sl<ProductRepository>()));
   sl.registerLazySingleton(()=> DeleteProductUseCase(sl<ProductRepository>()));
 
-  sl.registerLazySingleton(()=> GetClientsUseCase(sl<ClientRepository>()));
   sl.registerLazySingleton(()=> SaveClientUseCase(sl<ClientRepository>()));
-  sl.registerLazySingleton(()=> UpdateClientUseCase(sl<ClientRepository>()));
-  sl.registerLazySingleton(()=> DeleteClientUseCase(sl<ClientRepository>()));
 
   sl.registerLazySingleton(()=> CreateRemissionUseCase(sl<RemissionRepository>()));
   sl.registerLazySingleton(()=> GetFolioUseCase(sl<RemissionRepository>()));
@@ -93,8 +83,8 @@ Future<void> init() async{
   );
   sl.registerFactory(
     ()=> RemformBloc(
-      getClient: sl<GetClientsUseCase>(),
-      getProduct: sl<GetProductsUseCase>(),
+      clientRepo: sl<ClientRepository>(),
+      productRepository: sl<ProductRepository>(),
       getFolio: sl<GetFolioUseCase>(),
       createRem: sl<CreateRemissionUseCase>(),
     ),
@@ -107,18 +97,15 @@ Future<void> init() async{
   );
   sl.registerFactory(
     ()=> ProductBloc(
-      getProductsUseCase: sl<GetProductsUseCase>(),
+      productRepository: sl<ProductRepository>(),
       saveProductUseCase: sl<SaveProductUseCase>(),
-      updateProductUseCase: sl<UpdateProductUseCase>(),
       deleteProductUseCase: sl<DeleteProductUseCase>(),
     )
   );
   sl.registerFactory(
     ()=> ClientBloc(
-      deleteClientUseCase: sl<DeleteClientUseCase>(), 
-      getClientsUseCase: sl<GetClientsUseCase>(), 
+      clientReposritory: sl<ClientRepository>(), 
       saveClientUseCase: sl<SaveClientUseCase>(), 
-      updateClientUseCase: sl<UpdateClientUseCase>(),
       )
   );
 

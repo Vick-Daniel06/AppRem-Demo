@@ -1,8 +1,8 @@
 
 import 'package:apprem_v1/Domain/entities/detail_line.dart';
 import 'package:apprem_v1/Domain/entities/remission.dart';
-import 'package:apprem_v1/Domain/usecases/client/get_clients_use_case.dart';
-import 'package:apprem_v1/Domain/usecases/product/get_products_use_case.dart';
+import 'package:apprem_v1/Domain/respositories_interfaces/client_repository.dart';
+import 'package:apprem_v1/Domain/respositories_interfaces/product_repository.dart';
 import 'package:apprem_v1/Domain/usecases/remission/create_remission_use_case.dart';
 import 'package:apprem_v1/Domain/usecases/remission/get_folio_use_case.dart';
 import 'package:apprem_v1/Presentation/blocs/remissionForm/creator_state.dart';
@@ -13,19 +13,19 @@ import 'package:uuid/uuid.dart';
 
 class RemformBloc extends Bloc<RemformEvent, RemFormState> {
 
-  final GetProductsUseCase _getProductsUseCase;
-  final GetClientsUseCase _getClientsUseCase;
+  final ProductRepository _productRepository;
+  final ClientRepository _clientsRepo;
   final GetFolioUseCase _getFolioUseCase;
   final CreateRemissionUseCase _createRemissionUseCase;
   final _uuid = const Uuid();
 
   RemformBloc({
-    required GetProductsUseCase getProduct,
-    required GetClientsUseCase getClient,
+    required ProductRepository productRepository,
+    required ClientRepository clientRepo,
     required GetFolioUseCase getFolio,
     required CreateRemissionUseCase createRem,
-  }) : _getProductsUseCase = getProduct,
-  _getClientsUseCase = getClient,
+  }) : _productRepository = productRepository,
+  _clientsRepo = clientRepo,
   _getFolioUseCase = getFolio,
   _createRemissionUseCase = createRem,
   super(RemFormState.initial()){
@@ -34,14 +34,15 @@ class RemformBloc extends Bloc<RemformEvent, RemFormState> {
     on<ProductAdded>(_onProductAdded);
     on<ProductDeleted>(_onProductDeleted);
     on<SaveRemissionPressed>(_onSaveRemissionPressed);
+    on<ClearRemformError>(_onClearError);
   }
 
   //Cragar los catalogos al abir pantalla
   Future<void> _onInitizeCreator( InitializeCreator event, Emitter<RemFormState> emit,) async{
     emit(state.copyWith(status: FormStatus.catalogsloading));
     try{
-      final products = await _getProductsUseCase();
-      final clients = await _getClientsUseCase();
+      final products = await _productRepository.obtenerProductos();
+      final clients = await _clientsRepo.obtenerClientes();
       final nextFolio = await _getFolioUseCase();
 
       emit(state.copyWith(
@@ -67,9 +68,11 @@ class RemformBloc extends Bloc<RemformEvent, RemFormState> {
     final actualLines = List<DetailLine>.from(state.detailLine);
     //Verificacion si el producto ya estaba agregado para solo incrementar la cantidad
     final existingIndex = actualLines.indexWhere(
-      (line) => line.prodctoId == event.product.id,
+      (line) => line.prodctoId == event.product.id && line.precioUnitarioEnEseMomento == event.unitPrice
     );
-    if(existingIndex != -1){
+
+
+    if(existingIndex != -1 ){
       final oldLine = actualLines[existingIndex];
       final newAmount = oldLine.cantidad + event.amount;
 
@@ -80,7 +83,7 @@ class RemformBloc extends Bloc<RemformEvent, RemFormState> {
         nombreProducto: oldLine.nombreProducto,
         cantidad: newAmount.toInt(),
         precioSugeridoOriginal: oldLine.precioSugeridoOriginal,
-        precioUnitarioEnEseMomento: oldLine.precioUnitarioEnEseMomento,
+        precioUnitarioEnEseMomento: event.unitPrice,
       );
     }else{
       //Si es un productro nuevo, se crea las lineas desde cero
@@ -90,7 +93,7 @@ class RemformBloc extends Bloc<RemformEvent, RemFormState> {
          nombreProducto: event.product.nombre,
           cantidad: event.amount.toInt(),
            precioSugeridoOriginal: event.product.precioSugerido,
-            precioUnitarioEnEseMomento: event.product.precioSugerido,// Por defecto se vende al precio sugerido
+            precioUnitarioEnEseMomento: event.unitPrice,// Por defecto se vende al precio sugerido
             ));
     }
 
@@ -111,12 +114,14 @@ class RemformBloc extends Bloc<RemformEvent, RemFormState> {
   }
 
   //Guardar todo de forma automatica en SQLite
-  Future<void> _onSaveRemissionPressed(SaveRemissionPressed event, Emitter<RemFormState> emit)async{
+  Future<void> _onSaveRemissionPressed(SaveRemissionPressed event, Emitter<RemFormState> emit)async
+  {
     if(state.clientSelected == null){
       emit(state.copyWith(
         status: FormStatus.error,
         errorMessage: 'Debes seleccionar un cliente anes de guardar'
       ));
+      
       return;
     }
     if(state.detailLine.isEmpty){
@@ -153,10 +158,17 @@ class RemformBloc extends Bloc<RemformEvent, RemFormState> {
              );
              //Se guarda fisicamente en Sqlite usando el caso de uso
              await _createRemissionUseCase(newRemission);
+             
              emit(state.copyWith(status: FormStatus.success, savedRemissionId: remissionId));
     }catch(e){
       emit(state.copyWith(status: FormStatus.error,
       errorMessage: 'Error al guardar la remision ${e.toString()}'));
     }
+  }
+
+  void _onClearError(ClearRemformError event, Emitter<RemFormState> emit){
+    //Vuelve a ser null para mostrar el mensaje de la validacion otra vez
+    emit(state.copyWith(errorMessage: null,status: FormStatus.inicial ));
+
   }
 }

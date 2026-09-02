@@ -23,7 +23,7 @@ class DetailLineModel extends DetailLine {
       nombreProducto: lines.nombreProducto, 
       cantidad: lines.cantidad, 
       precioSugeridoOriginal: lines.precioSugeridoOriginal, 
-      precioUnitarioEnEseMomento: lines.precioSugeridoOriginal
+      precioUnitarioEnEseMomento: lines.precioUnitarioEnEseMomento
       );
   }
   //

@@ -2,6 +2,7 @@
 
 import 'package:apprem_v1/Domain/entities/client.dart';
 import 'package:equatable/equatable.dart';
+//EQUATABLE AL COMPARA OBJETOS, SI HAY UN ERROR Y DA OTRA VEZ EL ERROR YA NO LO MUESTRA LA SEGUNDA VEZ POR QUE CREE QUE ES LO MISMO
 
 abstract class ClientEvent extends Equatable {
   const ClientEvent();

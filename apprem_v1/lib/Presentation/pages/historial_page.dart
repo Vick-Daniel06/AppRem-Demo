@@ -26,7 +26,7 @@ class _HistorialPageState extends State<HistorialPage>{
     return Scaffold(
       appBar: AppBar(
         title: const Text('Historal de Remisioines'),
-        actions: [
+        /*actions: [
           IconButton(
             onPressed: (){
               context.pushNamed('products');
@@ -41,7 +41,7 @@ class _HistorialPageState extends State<HistorialPage>{
               icon: const Icon(Icons.person_2),
               tooltip: 'Clientes',
               ),
-        ],
+        ],*/
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

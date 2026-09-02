@@ -3,6 +3,7 @@ import 'package:apprem_v1/Presentation/blocs/products/product_bloc.dart';
 import 'package:apprem_v1/Presentation/blocs/products/products_event.dart';
 import 'package:apprem_v1/Presentation/blocs/products/products_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 
@@ -105,6 +106,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                       TextFormField(
                         controller: _nameController,
                         enabled: !isLoading,
+                        maxLength: 50,
+                        maxLengthEnforcement: MaxLengthEnforcement.enforced,
                         decoration: const InputDecoration(
                           labelText: 'Nombre del Producto',
                           border: OutlineInputBorder(),
@@ -114,6 +117,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                           if (value == null || value.trim().isEmpty) {
                             return 'Por favor ingresa el nombre del producto';
                           }
+                          if(value.trim().length> 50){
+                            return 'No puede superar los 50 caracteres';
+                          }
                           return null;
                         },
                       ),
@@ -121,11 +127,16 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                       TextFormField(
                         controller: _pesoKg,
                         enabled: !isLoading,
+
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
+                        inputFormatters: [
+                          // Permite hasta 6 dígitos enteros y máximo 2 decimales
+                          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                        ],
                         decoration: const InputDecoration(
-                          labelText: 'Peso del producto',
+                          labelText: 'Peso del producto(kg)',
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.line_weight),
                           
@@ -134,9 +145,12 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                           if(value == null || value.trim().isEmpty){
                             return 'Porfavor ingrese el peso del producto';
                           }
-                          final parsed = double.tryParse(value.trim());
-                          if(parsed == null || parsed<0){
+                          final parsed = double.tryParse(value);
+                          if(parsed == null || parsed<=0){
                             return 'Ingresa un peso valido';
+                          }
+                          if(parsed>999999.99){
+                            return 'El precio no puede superar 999,999.99';
                           }
                           return null;
                         },
@@ -144,10 +158,15 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _priceController,
+                      
                         enabled: !isLoading,
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
+                        inputFormatters: [
+                          // Permite hasta 6 dígitos enteros y máximo 2 decimales
+                          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                        ],
                         decoration: const InputDecoration(
                           labelText: 'Precio',
                           border: OutlineInputBorder(),
@@ -157,9 +176,12 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                           if (value == null || value.trim().isEmpty) {
                             return 'Por favor ingresa el precio';
                           }
-                          final parsed = double.tryParse(value.trim());
-                          if (parsed == null || parsed < 0) {
+                          final parsed = double.tryParse(value);
+                          if (parsed == null || parsed <=0) {
                             return 'Ingresa un precio válido';
+                          }
+                         if (parsed > 999999.99) {
+                            return 'El precio no puede superar 999,999.99';
                           }
                           return null;
                         },

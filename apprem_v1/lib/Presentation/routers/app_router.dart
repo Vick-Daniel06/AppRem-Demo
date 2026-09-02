@@ -10,6 +10,7 @@ import 'package:apprem_v1/Presentation/pages/client_form_screen.dart';
 import 'package:apprem_v1/Presentation/pages/client_list_screen.dart';
 import 'package:apprem_v1/Presentation/pages/creater_remission_page.dart';
 import 'package:apprem_v1/Presentation/pages/historial_page.dart';
+import 'package:apprem_v1/Presentation/pages/home_page.dart';
 import 'package:apprem_v1/Presentation/pages/pdf_preview_page.dart';
 import 'package:apprem_v1/Presentation/pages/product_form_screen.dart';
 import 'package:apprem_v1/Presentation/pages/product_list_screen.dart';
@@ -18,7 +19,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AppRouter{
-  static const String historial = '/';
+  static const String homePage = '/';
+  static const String historial = '/historial';
   static const String createRemission = '/create_rem';
   static const String pdfPreviewPage = '/pdf-preview/:id';
   static const String productFormScreen = '/product_form';
@@ -29,6 +31,12 @@ class AppRouter{
   static final GoRouter router = GoRouter(
     initialLocation: historial,
     routes: [
+      GoRoute(
+        path: homePage,
+        name: 'homePage',
+        builder: (context, state) => const HomePage(),
+
+        ),
       GoRoute(
         path: historial,
         name: 'historial',

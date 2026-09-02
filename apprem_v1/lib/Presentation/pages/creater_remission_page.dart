@@ -1,6 +1,7 @@
 import 'package:apprem_v1/Presentation/blocs/deviceAction/device_action_bloc.dart';
 import 'package:apprem_v1/Presentation/blocs/deviceAction/device_action_event.dart';
 import 'package:apprem_v1/Presentation/blocs/deviceAction/device_action_state.dart';
+import 'package:apprem_v1/Presentation/blocs/products/product_bloc.dart';
 import 'package:apprem_v1/Presentation/blocs/remissionForm/creator_state.dart';
 import 'package:apprem_v1/Presentation/blocs/remissionForm/remForm_bloc.dart';
 import 'package:apprem_v1/Presentation/blocs/remissionForm/remForm_event.dart';
@@ -8,6 +9,7 @@ import 'package:apprem_v1/Presentation/widgets/selector_client_modal.dart';
 import 'package:apprem_v1/Presentation/widgets/selector_product_modal.dart';
 import 'package:apprem_v1/Presentation/widgets/signature_canva.dart';
 import 'package:apprem_v1/injection_container.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -29,16 +31,19 @@ class _CreaterRemissionPage extends State<CreaterRemissionPage>{
       providers: [
         BlocProvider<RemformBloc>(create: (context) => sl<RemformBloc>()..add(InitializeCreator())),
         BlocProvider<DeviceActionBloc>(create: (context) => sl<DeviceActionBloc>()),
+        BlocProvider<ProductBloc>(create: (context) => sl<ProductBloc>()),
       ],
       child: MultiBlocListener(
         listeners: [
           BlocListener<RemformBloc, RemFormState>(
-           listenWhen: (previous, current) => previous.status != current.status,
+           listenWhen: (previous, current) => 
+           previous.status != current.status || current.errorMessage!= null,
             listener: (context, state){
               
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              //ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
               if(state.status == FormStatus.saving){
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Row(
@@ -48,11 +53,12 @@ class _CreaterRemissionPage extends State<CreaterRemissionPage>{
                         Text('Guardando remision')
                       ],
                     ),
-                    duration: Duration(seconds: 3),
+                    duration: Duration(seconds: 1),
                     )
                 );
               }
               if (state.status == FormStatus.success && state.savedRemissionId != null) {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Remisión guardada con éxito')),
                 );
@@ -62,10 +68,14 @@ class _CreaterRemissionPage extends State<CreaterRemissionPage>{
                   pathParameters: {'id': state.savedRemissionId!},
                 );
               }
+              //Estado error
               if(state.status == FormStatus.error && state.errorMessage != null){
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(state.errorMessage!), backgroundColor: Colors.red,),
                 );
+                //limpiar error y volver a estado inicial
+                context.read<RemformBloc>().add(ClearRemformError());
               }
             }
             ),
@@ -118,7 +128,7 @@ class _CreaterRemissionPage extends State<CreaterRemissionPage>{
 
                     // Seccion C: Hardware (Captura de Foto y Firma)
                     _buildSeccionHardware(context),
-                    const Divider(height: 32),
+                    const Divider(height: 40),
 
                     // Seccion D: Totales y Botón de Envío Fuerte
                     _buildSeccionTotalAndSave(context, state),
@@ -134,8 +144,23 @@ class _CreaterRemissionPage extends State<CreaterRemissionPage>{
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
         const Text('Cliente de la Entrega', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
         const SizedBox(height: 8,),
+        ElevatedButton.icon(
+          onPressed: ()async{
+            await context.pushNamed('clients');
+            if(context.mounted){
+              context.read<RemformBloc>().add(InitializeCreator());
+            }
+          }, 
+          icon: const Icon(Icons.add),
+          label: const Text('crear'),
+          ),
+          ],
+          ),
         ListTile(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide(color: Colors.grey.shade300)),
           leading: const Icon(Icons.person),
@@ -168,25 +193,30 @@ class _CreaterRemissionPage extends State<CreaterRemissionPage>{
   Widget _buildSeccionProducts(BuildContext context, RemFormState state) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: [   
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('Productos Añadidos', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            ElevatedButton.icon(
+            Text('Productos Añadidos', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        
+        const SizedBox(height: 8),
+          ElevatedButton.icon(
               onPressed: () {
+                
                 // TODO: Abrir el selector_producto_modal.dart
                 showModalBottomSheet(context: context, 
                 isScrollControlled: true, //Para que suba con el teclado
                 builder: (modalContext){
-                  return SelectorProductoModal(
-                    catalog: state.productCatalog, //Los productos cargados de Db
+                  return BlocProvider.value(
+                    value: context.read<ProductBloc>(),
+                    //atalog: state.productCatalog, //Los productos cargados de Db
+                    child: SelectorProductoModal(
+                     
                      onAddProduct: (producto, cantidad, precioUnitario){
                       //El evento BLoC para agregar el renglon y recalcular totales
-                      context.read<RemformBloc>().add(
-                        ProductAdded(producto, cantidad, precioUnitario),
-                      );
+                      context.read<RemformBloc>().add(ProductAdded(producto, cantidad, precioUnitario));
                      }
+                    ),
                   );
                 }
                 );
@@ -195,8 +225,12 @@ class _CreaterRemissionPage extends State<CreaterRemissionPage>{
               label: const Text('Agregar'),
             ),
           ],
+
         ),
-        const SizedBox(height: 8),
+          
+         const SizedBox(height: 8),
+      
+
         if (state.detailLine.isEmpty)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 16.0),

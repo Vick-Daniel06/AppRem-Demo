@@ -4,6 +4,7 @@ import 'package:apprem_v1/Presentation/blocs/clients/client_bloc.dart';
 import 'package:apprem_v1/Presentation/blocs/clients/client_event.dart';
 import 'package:apprem_v1/Presentation/blocs/clients/client_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 
@@ -94,14 +95,20 @@ class _ClientFormScreenState extends State<ClientFormScreen>{
                     TextFormField(
                       controller: _nameController,
                       enabled: !isLoading,
+                      maxLength: 50,
+                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
                       decoration: const InputDecoration(
                         labelText: 'Nombre del Cliente',
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.person_2_outlined),
                       ),
                       validator: (value){
-                        if(value == null || value.trim().isEmpty){
+                        final texto = value?.trim() ?? '';
+                        if(texto == null || texto.isEmpty){
                           return 'Por favor ingresa el nombre del Cliente';
+                        }
+                        if(texto.length > 50){
+                          return 'No puede superar los 50 caracteres';
                         }
                         return null;
                       },
@@ -110,6 +117,8 @@ class _ClientFormScreenState extends State<ClientFormScreen>{
                     TextFormField(
                       controller: _ubicacion,
                       enabled: !isLoading,
+                      maxLength: 100,
+                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
                       decoration: const InputDecoration(
                         labelText: 'Ubicacion',
                         border: OutlineInputBorder(),
@@ -118,6 +127,9 @@ class _ClientFormScreenState extends State<ClientFormScreen>{
                       validator: (value) {
                         if(value == null || value.trim().isEmpty){
                           return 'Por favor agregar ubicacion';
+                        }
+                        if(value.trim().length > 50){
+                          return 'No puede superar los 100 caracteres';
                         }
                         return null;
                       },

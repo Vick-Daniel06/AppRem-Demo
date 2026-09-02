@@ -1,6 +1,5 @@
 
 import 'package:apprem_v1/Data/datasources/remission_local_data_source.dart';
-import 'package:apprem_v1/Data/models/detail_line_model.dart';
 import 'package:apprem_v1/Data/models/remission_model.dart';
 import 'package:apprem_v1/Domain/entities/remission.dart';
 import 'package:apprem_v1/Domain/respositories_interfaces/remission_repository.dart';

@@ -1,26 +1,22 @@
 
 
+import 'package:apprem_v1/Domain/respositories_interfaces/product_repository.dart';
 import 'package:apprem_v1/Domain/usecases/product/delete_product_use_case.dart';
-import 'package:apprem_v1/Domain/usecases/product/get_products_use_case.dart';
 import 'package:apprem_v1/Domain/usecases/product/save_product_use_case.dart';
-import 'package:apprem_v1/Domain/usecases/product/update_product_use_case.dart';
 import 'package:apprem_v1/Presentation/blocs/products/products_event.dart';
 import 'package:apprem_v1/Presentation/blocs/products/products_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ProductBloc extends Bloc<ProductsEvent, ProductState> {
- final GetProductsUseCase _getProductsUseCase;
+  final ProductRepository _productRepository;
   final SaveProductUseCase _saveProductUseCase;
-  final UpdateProductUseCase _updateProductUseCase;
   final DeleteProductUseCase _deleteProductUseCase;
   ProductBloc({
-    required GetProductsUseCase getProductsUseCase,
     required SaveProductUseCase saveProductUseCase,
-    required UpdateProductUseCase updateProductUseCase,
+    required ProductRepository productRepository,
     required DeleteProductUseCase deleteProductUseCase,
-  })  : _getProductsUseCase = getProductsUseCase,
+  })  : _productRepository = productRepository,
         _saveProductUseCase = saveProductUseCase,
-        _updateProductUseCase = updateProductUseCase,
         _deleteProductUseCase = deleteProductUseCase,
         super(ProductInitial()) {
     on<LoadProductsEvent>(_onLoadProducts);
@@ -35,7 +31,7 @@ class ProductBloc extends Bloc<ProductsEvent, ProductState> {
   ) async {
     emit(ProductLoading());
     try {
-      final products = await _getProductsUseCase();
+      final products = await _productRepository.obtenerProductos();
       emit(ProductLoaded(products));
     } catch (e) {
       emit(ProductError('Error al cargar productos: ${e.toString()}'));
@@ -62,7 +58,7 @@ class ProductBloc extends Bloc<ProductsEvent, ProductState> {
   ) async {
     emit(ProductLoading());
     try {
-      await _updateProductUseCase(event.product);
+      await _productRepository.actualizarProdcuto(event.product);
       emit(const ProductOperationSuccess('Producto actualizado con éxito'));
       add(LoadProductsEvent());
     } catch (e) {

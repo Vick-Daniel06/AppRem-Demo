@@ -46,3 +46,9 @@ class SaveRemissionPressed extends RemformEvent{
   @override
   List<Object?> get props => [signaturePath, evidanceFotoPath];
 }
+
+//Evento para restear elk mensaje de Error
+class ClearRemformError extends RemformEvent{
+  @override
+  List<Object> get props => [];
+}
