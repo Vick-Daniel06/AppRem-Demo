@@ -1,4 +1,5 @@
 
+import 'package:apprem_v1/Domain/core/result.dart';
 import 'package:apprem_v1/Domain/entities/detail_line.dart';
 import 'package:apprem_v1/Domain/entities/remission.dart';
 import 'package:apprem_v1/Domain/respositories_interfaces/client_repository.dart';
@@ -157,9 +158,17 @@ class RemformBloc extends Bloc<RemformEvent, RemFormState> {
              fotoEvidenciaPath: event.evidanceFotoPath
              );
              //Se guarda fisicamente en Sqlite usando el caso de uso
-             await _createRemissionUseCase(newRemission);
-             
+             final createRem = await _createRemissionUseCase(newRemission);
+
+             if(createRem is Success){
              emit(state.copyWith(status: FormStatus.success, savedRemissionId: remissionId));
+             }else if(createRem is Failure){
+              final failure = createRem as Failure;
+              emit(state.copyWith(
+                errorMessage: failure.message,
+                status:  FormStatus.error,
+              ));
+             }
     }catch(e){
       emit(state.copyWith(status: FormStatus.error,
       errorMessage: 'Error al guardar la remision ${e.toString()}'));

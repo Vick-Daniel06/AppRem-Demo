@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:apprem_v1/Domain/core/result.dart';
 import 'package:apprem_v1/Domain/usecases/remission/get_remission_by_id_use_case.dart';
 import 'package:apprem_v1/Presentation/blocs/pdfGenerate/pdf_event.dart';
 import 'package:apprem_v1/Presentation/blocs/pdfGenerate/pdf_state.dart';
@@ -27,15 +30,20 @@ class PdfBloc extends Bloc<PdfEvent, PdfState> {
         return;
       }
       //Generacion de PDF
-      final path = await _generatePdfAndShareUseCase(remission);
-      if(path != null){
+      final result = await _generatePdfAndShareUseCase(remission);
+      if(result is Success){
+        final success = result as Success<String>;
+        final String path = success.data;
         emit(PdfSuccessState(path));
-      }else{
-        emit(const PdfErrorState('No se pudo generar el archivo Pdf'));
+      }else if(result is Failure)
+      {
+        final failure = result as Failure;
+        emit(PdfErrorState(failure.message));
       }
-    }catch(e){
-      emit(PdfErrorState('Erro al generar PDF: $e'));
-    }
+  }
+  catch(e){
+    emit(PdfErrorState('Error al procesar el pdf: $e'));
+  }
   }
 
   Future<void> _onSharePdf(SharePdfEvent event, Emitter<PdfState>emit) async{

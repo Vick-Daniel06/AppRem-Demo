@@ -8,15 +8,17 @@ class RemissionLocalDataSource {
 
   RemissionLocalDataSource(this._database);
 /// QUERY: Trae todo el historial de remisiones con sus líneas de detalle cargadas
-Future<List<RemissionModel>> obtenerHistorialRemisiones() async {
+Future<List<RemissionModel>> obtenerHistorialRemisiones({required int limit, required int offset}) async {
     // Trae todas las cabeceras ordenadas por fecha (la más reciente primero)
     /*final headerQuery = _database.select(_database.remissions)
       ..orderBy([(t) => OrderingTerm(expression: t.fechaCreacion, mode: OrderingMode.desc)]);*/
     
-    final rawHeader = await (_database.select(_database.remissions)
-    ..orderBy([(t)=> OrderingTerm(expression: t.fechaCreacion, mode: OrderingMode.desc)]))
-    .get()
-    ;
+    final query = (_database.select(_database.remissions)
+    ..orderBy([(t)=> OrderingTerm.desc( t.fechaCreacion)]))
+    ..limit(limit, offset: offset);
+
+    final rawHeader = await query.get();
+
     final List<RemissionModel> history = [];
 
     // Por cada cabecera, buscamos sus renglones correspondientes
@@ -34,6 +36,8 @@ Future<List<RemissionModel>> obtenerHistorialRemisiones() async {
 
     return history;
   }
+
+  
 
 /// TRANSACTION: Guarda la remisión y sus líneas de manera atómica (Todo o nada)
   Future<void> guardarRemision(RemissionModel remission) async{

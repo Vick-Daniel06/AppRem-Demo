@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:apprem_v1/Domain/core/result.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -8,7 +10,7 @@ import 'package:apprem_v1/Domain/services_interfaces/pdf_services.dart';
 
 class PdfServiceImpl implements PdfServices {
   @override
-   Future<String?> generarPdfYCompartir(Remission remission) async{
+   Future<Result<String>> generarPdfYCompartir(Remission remission) async{
 
     try{
       final pdf = pw.Document();
@@ -134,10 +136,12 @@ pdf.addPage(
 
       await file.writeAsBytes(await pdf.save());
 
-      return file.path;
-    }catch(e){
-      print('Error critico durante el renderzado de PDF: $e');
-      return null;
+      return Success(file.path);
+    }on PlatformException catch(e){
+      return Failure('Error de permisos o hardware: $e');
+    }
+    catch(e){
+      return Failure('No se pudo crear el pdf: $e');
     }
    }
 }
