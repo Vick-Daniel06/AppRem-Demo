@@ -1,4 +1,5 @@
 
+import 'package:apprem_v1/Domain/core/result.dart';
 import 'package:apprem_v1/Domain/entities/remission.dart';
 import 'package:apprem_v1/Domain/services_interfaces/pdf_services.dart';
 
@@ -6,7 +7,7 @@ class GeneratePdfAndShareUseCase {
   final PdfServices _pdfServices;
   GeneratePdfAndShareUseCase(this._pdfServices);
 
-  Future<String?> call(Remission remission) async {
+  Future<Result<String?>> call(Remission remission) async {
     if(remission.detailLines.isEmpty){
       throw Exception('Nos se puede crear sin Lineas de Detalle');
     }

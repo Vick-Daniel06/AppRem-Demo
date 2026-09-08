@@ -1,27 +1,33 @@
 import 'package:apprem_v1/Domain/entities/remission.dart';
 import 'package:equatable/equatable.dart';
 
-abstract class HistorialState extends Equatable{
-  const HistorialState();
-
-  @override
-  List<Object?> get props => [];
-}
-class HistorialInitial extends HistorialState {} 
-
-class HistorialLoad extends HistorialState{}
-
-class HistorialReady extends HistorialState{
+class HistorialState extends Equatable {
   final List<Remission> remission;
-  const HistorialReady(this.remission);
+  final bool hasReachedMax;
+  final bool isLoading;
+  final String? error;
+
+  const HistorialState({
+    this.remission = const [],
+    this.hasReachedMax = false,
+    this.isLoading = false,
+    this.error,
+  });
+
+  HistorialState copyWith({
+    List<Remission>? remission,
+    bool? hasReachedMax,
+    bool? isLoading,
+    String? error,
+  }) {
+    return HistorialState(
+      remission: remission ?? this.remission,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+      isLoading: isLoading ?? this.isLoading,
+      error: error ?? this.error,
+    );
+  }
 
   @override
-  List<Object?> get props => [remission];
-}
-class HistorialError extends HistorialState{
-  final String message;
-  const HistorialError(this.message);
-
-  @override
-  List<Object?>get props =>[message];
+  List<Object?> get props => [remission, hasReachedMax, isLoading, error];
 }

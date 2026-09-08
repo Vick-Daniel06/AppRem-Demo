@@ -1,4 +1,5 @@
 
+import 'package:apprem_v1/Domain/core/result.dart';
 import 'package:apprem_v1/Domain/entities/remission.dart';
 import 'package:apprem_v1/Domain/respositories_interfaces/remission_repository.dart';
 
@@ -7,7 +8,8 @@ class CreateRemissionUseCase {
 
   CreateRemissionUseCase(this._repository);
 
-  Future<void> call(Remission remission) async{
+  Future<Result<()>> call(Remission remission) async{
+    try{
     // Regla de negocio: No se pueden hacer remisiones vacías
     if (remission.detailLines.isEmpty) {
       throw Exception('No se puede guardar una remisión sin productos seleccionados.');
@@ -21,7 +23,12 @@ class CreateRemissionUseCase {
     if(remission.firmaPath.isEmpty){
       throw Exception('Es obligatorio la firma');
     }
-
+    
     await _repository.crearRemision(remission);
+    return const Success(());
+    }catch(e){
+      return Failure(e.toString());
+    }
+    
   }
 }

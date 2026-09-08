@@ -1,4 +1,5 @@
 
+import 'package:apprem_v1/Domain/core/result.dart';
 import 'package:apprem_v1/Domain/services_interfaces/camera_services.dart';
 import 'package:apprem_v1/Domain/services_interfaces/signature_services.dart';
 import 'package:apprem_v1/Presentation/blocs/deviceAction/device_action_event.dart';
@@ -17,31 +18,46 @@ class DeviceActionBloc extends Bloc<DeviceActionEvent, DeviceActionState> {
 
   Future<void> _onTakeFotoEvidance(TakedFotoEvidance event, Emitter<DeviceActionState> emit) async{
     emit(FotoProccess());
-    try{
-      final path = await _cameraService.capturaFotoEvidencia();
-      if(path != null){
-        emit(SuccessFotoProcess(path));
-      }else{
-        emit(DeviceActionInitial());
-      }
-    }catch(e){
-      emit(DeviceActionError('Error al acceder a la camara: ${e.toString()}'));
+    
+      final result = await _cameraService.capturaFotoEvidencia();
+      
+      
+      try{
+        if(result is Success){
+          final success = result as Success<String>;
+          final String imagePath = success.data;//String 
+        emit(SuccessFotoProcess(imagePath));
+        
+        }
+      else if(result is Failure){
+        final failure = result as Failure;
+        emit(DeviceActionError(failure.toString()));
+        
+      
     }
+  }catch(e){
+    emit(DeviceActionError('Erro al guardar imagen: $e'));
+  }
+      
   }
 
   Future<void> _onSignatureProcessController(SigantureProcessedController event, Emitter<DeviceActionState> emit) async{
     emit(SignatureProcess());
     try{
       // El servicio toma los trazos vectoriales del widget y los exporta a un archivo físico .png
-      final path = await _signatureService.guardarFirmaDigital(event.signatureController);
+      final result = await _signatureService.guardarFirmaDigital(event.signatureController);
 
-      if(path != null){
-        emit(SuccessSignatureProcess(path));
-      }else{
-        emit(DeviceActionError('El lienzo dew firma esta vacio'));
+      if(result is Success){
+        final success = result as Success<String>;
+        final String signaturePath = success.data;
+        emit(SuccessSignatureProcess(signaturePath));
+      }
+      else if(result is Failure){
+        final failure = result as Failure;
+        emit(DeviceActionError(failure.message));
       }
     }catch(e){
-      emit(DeviceActionError('Error al procesar la frima: ${e.toString()}'));
-    }
+      emit(DeviceActionError('Error al procesar firma: $e'));
+    } 
   }
 }

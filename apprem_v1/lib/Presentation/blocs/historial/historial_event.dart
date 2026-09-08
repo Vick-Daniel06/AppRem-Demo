@@ -8,4 +8,5 @@ abstract class HistorialEvent extends Equatable {
   List<Object?> get props => [];
 }
 //Se dispara cuando la pantalla se abre por primera vez o cuando el usario haga un "pull-to-refresh"
-class GetLogHistory extends HistorialEvent{}
+class GetHistoryInitial extends HistorialEvent{}
+class GetNextPage extends HistorialEvent{}

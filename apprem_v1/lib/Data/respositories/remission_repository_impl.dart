@@ -1,6 +1,7 @@
 
 import 'package:apprem_v1/Data/datasources/remission_local_data_source.dart';
 import 'package:apprem_v1/Data/models/remission_model.dart';
+import 'package:apprem_v1/Domain/core/result.dart';
 import 'package:apprem_v1/Domain/entities/remission.dart';
 import 'package:apprem_v1/Domain/respositories_interfaces/remission_repository.dart';
 
@@ -9,10 +10,19 @@ class RemissionRepositoryImpl implements RemissionRepository {
   RemissionRepositoryImpl(this._localDataSource);
 
   @override
-  Future<List<Remission>> obtenerHistorialDeRemisiones() async{
-    final modelos = await _localDataSource.obtenerHistorialRemisiones();
-    return modelos;
+  Future<Result<List<Remission>>> obtenerHistorialDeRemisiones({
+    required int limit,
+    required int offset,
+  }) async{
+    try{
+    final modelos = await _localDataSource.obtenerHistorialRemisiones(limit: limit, offset: offset);
+    return Success(modelos);
+    }catch(e){
+      return Failure(e.toString());
+    }
   }
+  
+ 
   @override
   Future<String> obtenerSiguienteFolio() async{
     //va por el numero que da la DB
@@ -25,10 +35,15 @@ class RemissionRepositoryImpl implements RemissionRepository {
   }
 
   @override
-  Future<void> crearRemision(Remission remission) async{
+  Future<Result<()>> crearRemision(Remission remission) async{
+    try{
     final remissionModel = RemissionModel.fromEntity(remission);
-  //El modelo completo es el que se le manda al DataSource
-  await _localDataSource.guardarRemision(remissionModel);
+    //El modelo completo es el que se le manda al DataSource
+    await _localDataSource.guardarRemision(remissionModel);
+    return Success(());
+    }catch(e){
+      return Failure('No se pudo Guardar la remision: $e');
+    }
   }
   @override
   Future<Remission?> obtenerRemisionById(String id) async{

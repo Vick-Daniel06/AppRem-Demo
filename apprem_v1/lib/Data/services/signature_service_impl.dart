@@ -2,14 +2,17 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:apprem_v1/Domain/core/result.dart';
 import 'package:apprem_v1/Domain/services_interfaces/signature_services.dart';
+import 'package:drift/drift.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
 class SignatureServiceImpl implements SignatureService {
 
 @override
-  Future<String?> guardarFirmaDigital(Uint8List bytes) async{
+  Future<Result<String>> guardarFirmaDigital(Uint8List bytes) async{
     try{
       //obtener la ruta del directorio de la app
       final directory = await getApplicationDocumentsDirectory();
@@ -26,10 +29,13 @@ class SignatureServiceImpl implements SignatureService {
       final File signatureArchive = File(permanentPath);
       await signatureArchive.writeAsBytes(bytes);
       //retorna el path absoluto para que pueda ser guardado en la Remision de Drift
-      return signatureArchive.path;
-    }catch(e){
-      print('Error critico al escribir el archivo de firma: $e');
-      return null;
+
+      return Success(signatureArchive.path);
+    }on PlatformException catch(e){
+      return Failure('Error de permisos o hardware: $e');
+    }
+    catch(e){
+      return Failure('No se pudo guardar la firma: $e');
     }
   }
 
