@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="AppRem.Data/AppRem.Data.csproj" />
+  <Project Path="AppRem.Domain/AppRem.Domain.csproj" />
+  <Project Path="AppRem.Presentation/AppRem.Presentation.csproj" />
+</Solution>
