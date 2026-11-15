@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="AppRem.Data/AppRem.Data.csproj" />
+  <Project Path="AppRem.Domain/AppRem.Domain.csproj" />
+  <Project Path="WebApi/WebApi.csproj" Id="f023af70-1d9e-4ff9-b8bc-c3ba6d25a587" />
+</Solution>
